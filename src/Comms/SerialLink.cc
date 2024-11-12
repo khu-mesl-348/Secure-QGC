@@ -19,6 +19,12 @@
 #endif
 #include <QtCore/QCoreApplication>
 #include <QtCore/QSettings>
+#include "mc.h"
+#include "secure_qgc.h"
+
+//#define CIPHER_MODE
+//#define INTEGRITY_MODE
+#define NORMAL_MODE
 
 QGC_LOGGING_CATEGORY(SerialLinkLog, "SerialLinkLog")
 
@@ -61,8 +67,25 @@ bool SerialLink::_isBootloader()
 void SerialLink::_writeBytes(const QByteArray &data)
 {
     if(_port && _port->isOpen()) {
+#ifdef NORMAL_MODE
         emit bytesSent(this, data);
         _port->write(data);
+#endif
+
+#ifdef CIPHER_MODE
+        QByteArray mesl_data;
+        mesl_qgc_encrypt(data, mesl_data);
+        emit bytesSent(this, mesl_data);
+        _port->write(mesl_data);
+#endif
+
+#ifdef INTEGRITY_MODE
+        QByteArray mesl_data;
+        mesl_qgc_integrity_gen(data, mesl_data);
+        emit bytesSent(this, mesl_data);
+        _port->write(mesl_data);
+#endif
+
     } else {
         // Error occurred
         qWarning() << "Serial port not writeable";

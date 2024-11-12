@@ -21,6 +21,13 @@
 #include <QtCore/QFileInfo>
 
 #include <QtQml/QtQml>
+#include "mc.h"
+#include "secure_qgc.h"
+
+//#define CIPHER_MODE
+//#define INTEGRITY_MODE
+#define NORMAL_MODE
+QByteArray mesl_buf;
 
 Q_DECLARE_METATYPE(mavlink_message_t)
 
@@ -197,6 +204,15 @@ void MAVLinkProtocol::receiveBytes(LinkInterface* link, QByteArray b)
     }
 
     uint8_t mavlinkChannel = link->mavlinkChannel();
+
+
+#ifdef CIPHER_MODE
+    mesl_qgc_decrypt(b,mesl_buf);
+#endif
+
+#ifdef INTEGRITY_MODE
+    mesl_qgc_integrity_check(b,mesl_buf);
+#endif
 
     for (int position = 0; position < b.size(); position++) {
         if (mavlink_parse_char(mavlinkChannel, static_cast<uint8_t>(b[position]), &_message, &_status)) {

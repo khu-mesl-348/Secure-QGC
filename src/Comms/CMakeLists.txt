@@ -17,6 +17,17 @@ qt_add_library(Comms STATIC
     TCPLink.h
     UDPLink.cc
     UDPLink.h
+    AES.cpp
+    AES.h
+    AES_config.h
+    mc.cpp
+    mc.h
+    RSA.cpp
+    RSA.h
+    SHA.cpp
+    SHA.h
+    secure_qgc.h
+    secure_qgc.cpp
 )
 
 target_link_libraries(Comms
